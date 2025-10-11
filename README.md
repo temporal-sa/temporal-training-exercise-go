@@ -41,15 +41,16 @@ temporal server start-dev --search-attribute AccountId=Text
 - Upsert Search Attributes from workflows
 - Workflow filtering and discovery
 
-### Exercise 5: Testing Strategy (45 min)
+### Exercise 5: User Metadata & Activity Summaries (30 min)
+- Activity summaries for better observability
+- Static workflow summaries
+- Enhanced monitoring in Temporal Web UI
+
+### Exercise 6: Testing Strategy (45 min)
 - Unit tests with TestWorkflowRule
 - Time skipping for fast tests
-- Activity mocking
-
-### Exercise 6: Error Handling & Recovery (60 min)
-- Compensation patterns (Saga)
-- Activity failure vs Workflow failure
-- Resumable activities with signals
+- Activity mocking with Mockito
+- Search attribute registration in tests
 
 ## Running Exercises
 
@@ -83,6 +84,20 @@ temporal server start-dev --search-attribute AccountId=Text
 ./gradlew run -PmainClass=com.temporal.training.exercise4.StartWorker
 # Run workflow (in another terminal)
 ./gradlew run -PmainClass=com.temporal.training.exercise4.StartWorkflow
+```
+
+### Exercise 5 (User Metadata & Activity Summaries)
+```bash
+# Start worker
+./gradlew run -PmainClass=com.temporal.training.exercise5.StartWorker
+# Run workflow (in another terminal)
+./gradlew run -PmainClass=com.temporal.training.exercise5.StartWorkflow
+```
+
+### Exercise 6 (Testing Strategy)
+```bash
+# Run tests
+./gradlew test --tests "com.temporal.training.exercise6.MoneyTransferWorkflowTest"
 ```
 
 ## Running Solutions
