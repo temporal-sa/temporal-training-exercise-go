@@ -1,40 +1,56 @@
-package com.temporal.training.exercise4;
+package com.temporal.training.solution5;
 
 import io.temporal.activity.ActivityOptions;
+import io.temporal.common.SearchAttributeKey;
 import io.temporal.workflow.Workflow;
 import org.slf4j.Logger;
 
 import java.time.Duration;
-// TODO: Import SearchAttributeKey for custom search attributes
 
 public class MoneyTransferWorkflowImpl implements MoneyTransferWorkflow {
     
     private static final Logger logger = Workflow.getLogger(MoneyTransferWorkflowImpl.class);
     
-    private final BankingActivities activities = Workflow.newActivityStub(
-        BankingActivities.class,
-        ActivityOptions.newBuilder()
-            .setStartToCloseTimeout(Duration.ofSeconds(5))
-            .build()
-    );
+    private static class ActivityFactory {
+        private static BankingActivities createActivity(String summary) {
+            return Workflow.newActivityStub(
+                BankingActivities.class,
+                ActivityOptions.newBuilder()
+                    .setStartToCloseTimeout(Duration.ofSeconds(5))
+                    .setSummary(summary)
+                    .build()
+            );
+        }
+        
+        static BankingActivities createWithdrawActivity(String accountId) {
+            return createActivity("Withdrawing funds from account " + accountId);
+        }
+        
+        static BankingActivities createDepositActivity(String accountId) {
+            return createActivity("Depositing funds to account " + accountId);
+        }
+        
+        static BankingActivities createRefundActivity(String accountId) {
+            return createActivity("Refunding funds to account " + accountId);
+        }
+    }
     
     private TransferStatus status = TransferStatus.PENDING;
-    private TransferRequest request;
     private boolean approved = false;
     private boolean approvalReceived = false;
     
     @Override
     public String transfer(TransferRequest request) {
-        this.request = request;
         logger.info("Starting transfer: {}", request);
         
-        // TODO: Set search attributes for filtering
-        // Use Workflow.upsertTypedSearchAttributes() with SearchAttributeKey.forKeyword("AccountId")
-        // Set the value to request.fromAccount()
+        // Set search attributes for filtering
+        Workflow.upsertTypedSearchAttributes(
+            SearchAttributeKey.forKeyword("AccountId").valueSet(request.fromAccount())
+        );
         
         try {
             // Step 1: Withdraw from source account
-            activities.withdraw(request.fromAccount(), request.amount());
+            ActivityFactory.createWithdrawActivity(request.fromAccount()).withdraw(request.fromAccount(), request.amount());
             logger.info("Withdrawal completed");
             
             // Step 2: Wait for approval
@@ -44,13 +60,13 @@ public class MoneyTransferWorkflowImpl implements MoneyTransferWorkflow {
             if (approved) {
                 // Step 3a: Approved - deposit to target account
                 status = TransferStatus.APPROVED;
-                activities.deposit(request.toAccount(), request.amount());
+                ActivityFactory.createDepositActivity(request.toAccount()).deposit(request.toAccount(), request.amount());
                 status = TransferStatus.COMPLETED;
                 logger.info("Transfer approved and completed");
                 return "Transfer completed successfully";
             } else {
                 // Step 3b: Not approved - refund to source account
-                activities.refund(request.fromAccount(), request.amount());
+                ActivityFactory.createRefundActivity(request.fromAccount()).refund(request.fromAccount(), request.amount());
                 status = TransferStatus.CANCELLED;
                 logger.info("Transfer rejected and refunded");
                 return "Transfer rejected and refunded";
@@ -73,6 +89,4 @@ public class MoneyTransferWorkflowImpl implements MoneyTransferWorkflow {
     public TransferStatus getStatus() {
         return status;
     }
-    
-
 }

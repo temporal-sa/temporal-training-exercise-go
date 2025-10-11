@@ -9,7 +9,7 @@ public class GreetingWorkflowImpl implements GreetingWorkflow {
     private final GreetingActivity activity = Workflow.newActivityStub(
         GreetingActivity.class,
         ActivityOptions.newBuilder()
-            .setStartToCloseTimeout(Duration.ofSeconds(10))
+            .setStartToCloseTimeout(Duration.ofSeconds(5))
             .build()
     );
 

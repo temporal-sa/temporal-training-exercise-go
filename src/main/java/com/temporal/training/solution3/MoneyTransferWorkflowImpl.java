@@ -13,7 +13,7 @@ public class MoneyTransferWorkflowImpl implements MoneyTransferWorkflow {
     private final BankingActivities activities = Workflow.newActivityStub(
         BankingActivities.class,
         ActivityOptions.newBuilder()
-            .setStartToCloseTimeout(Duration.ofSeconds(30))
+            .setStartToCloseTimeout(Duration.ofSeconds(5))
             .build()
     );
     
