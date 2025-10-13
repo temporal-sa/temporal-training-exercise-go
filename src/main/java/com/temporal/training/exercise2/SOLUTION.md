@@ -97,8 +97,8 @@ String transferResult = result.get(); // Get result
 
 ## Testing the Solution
 
-1. **Start Worker**: `./gradlew run -PmainClass=com.temporal.training.solution2.StartWorker`
-2. **Run Workflow**: `./gradlew run -PmainClass=com.temporal.training.solution2.StartWorkflow`
+1. **Start Worker**: `./gradlew execute -PmainClass=com.temporal.training.solution2.StartWorker`
+2. **Run Workflow**: `./gradlew execute -PmainClass=com.temporal.training.solution2.StartWorkflow`
 
 Expected output shows:
 - Withdrawal completion

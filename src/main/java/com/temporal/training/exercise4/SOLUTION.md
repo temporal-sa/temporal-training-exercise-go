@@ -49,8 +49,8 @@ public String transfer(TransferRequest request) {
 
 ## Testing the Solution
 
-1. **Start Worker**: `./gradlew run -PmainClass=com.temporal.training.solution4.StartWorker`
-2. **Run Workflow**: `./gradlew run -PmainClass=com.temporal.training.solution4.StartWorkflow`
+1. **Start Worker**: `./gradlew execute -PmainClass=com.temporal.training.solution4.StartWorker`
+2. **Run Workflow**: `./gradlew execute -PmainClass=com.temporal.training.solution4.StartWorkflow`
 3. **Verify in Web UI**: Open http://localhost:8233 and check workflow details
 
 ## Expected Results

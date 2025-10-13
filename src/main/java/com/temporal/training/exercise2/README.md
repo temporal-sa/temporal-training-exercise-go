@@ -48,8 +48,8 @@
 - **Compensation**: Undoing operations when things go wrong
 
 ## Testing
-1. Start the worker: `./gradlew run -PmainClass=com.temporal.training.exercise2.StartWorker`
-2. Run the workflow: `./gradlew run -PmainClass=com.temporal.training.exercise2.StartWorkflow`
+1. Start the worker: `./gradlew execute -PmainClass=com.temporal.training.exercise2.StartWorker`
+2. Run the workflow: `./gradlew execute -PmainClass=com.temporal.training.exercise2.StartWorkflow`
 3. Observe the workflow waiting for approval, then completing the transfer
 
 ## Next Steps

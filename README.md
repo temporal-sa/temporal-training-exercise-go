@@ -57,41 +57,41 @@ temporal server start-dev --search-attribute AccountId=Text
 ### Exercise 1 (Hello Temporal)
 ```bash
 # Start worker
-./gradlew run -PmainClass=com.temporal.training.exercise1.StartWorker
+./gradlew execute -PmainClass=com.temporal.training.exercise1.StartWorker
 # Run workflow (in another terminal)
-./gradlew run -PmainClass=com.temporal.training.exercise1.StartWorkflow
+./gradlew execute -PmainClass=com.temporal.training.exercise1.StartWorkflow
 ```
 
 ### Exercise 2 (Money Transfer Basics)
 ```bash
 # Start worker
-./gradlew run -PmainClass=com.temporal.training.exercise2.StartWorker
+./gradlew execute -PmainClass=com.temporal.training.exercise2.StartWorker
 # Run workflow (in another terminal)
-./gradlew run -PmainClass=com.temporal.training.exercise2.StartWorkflow
+./gradlew execute -PmainClass=com.temporal.training.exercise2.StartWorkflow
 ```
 
 ### Exercise 3 (Query Handlers)
 ```bash
 # Start worker
-./gradlew run -PmainClass=com.temporal.training.exercise3.StartWorker
+./gradlew execute -PmainClass=com.temporal.training.exercise3.StartWorker
 # Run workflow (in another terminal)
-./gradlew run -PmainClass=com.temporal.training.exercise3.StartWorkflow
+./gradlew execute -PmainClass=com.temporal.training.exercise3.StartWorkflow
 ```
 
 ### Exercise 4 (Visibility & Monitoring)
 ```bash
 # Start worker
-./gradlew run -PmainClass=com.temporal.training.exercise4.StartWorker
+./gradlew execute -PmainClass=com.temporal.training.exercise4.StartWorker
 # Run workflow (in another terminal)
-./gradlew run -PmainClass=com.temporal.training.exercise4.StartWorkflow
+./gradlew execute -PmainClass=com.temporal.training.exercise4.StartWorkflow
 ```
 
 ### Exercise 5 (User Metadata & Activity Summaries)
 ```bash
 # Start worker
-./gradlew run -PmainClass=com.temporal.training.exercise5.StartWorker
+./gradlew execute -PmainClass=com.temporal.training.exercise5.StartWorker
 # Run workflow (in another terminal)
-./gradlew run -PmainClass=com.temporal.training.exercise5.StartWorkflow
+./gradlew execute -PmainClass=com.temporal.training.exercise5.StartWorkflow
 ```
 
 ### Exercise 6 (Testing Strategy)

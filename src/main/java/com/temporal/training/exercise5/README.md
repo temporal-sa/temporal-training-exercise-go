@@ -39,12 +39,12 @@ temporal server start-dev --search-attribute AccountId=Text
 
 2. Run the worker:
 ```bash
-./gradlew run -PmainClass=com.temporal.training.exercise5.StartWorker
+./gradlew execute -PmainClass=com.temporal.training.exercise5.StartWorker
 ```
 
 3. Execute the workflow:
 ```bash
-./gradlew run -PmainClass=com.temporal.training.exercise5.StartWorkflow
+./gradlew execute -PmainClass=com.temporal.training.exercise5.StartWorkflow
 ```
 
 4. Check the Temporal Web UI at http://localhost:8233 to see the summaries in action

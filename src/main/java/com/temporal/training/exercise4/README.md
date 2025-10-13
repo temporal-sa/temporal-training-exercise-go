@@ -36,8 +36,8 @@ temporal server start-dev --search-attribute AccountId=Text
 ```
 
 ## Testing
-1. Start the worker: `./gradlew run -PmainClass=com.temporal.training.exercise4.StartWorker`
-2. Run the workflow: `./gradlew run -PmainClass=com.temporal.training.exercise4.StartWorkflow`
+1. Start the worker: `./gradlew execute -PmainClass=com.temporal.training.exercise4.StartWorker`
+2. Run the workflow: `./gradlew execute -PmainClass=com.temporal.training.exercise4.StartWorkflow`
 3. Open Temporal Web UI (http://localhost:8233) and verify the AccountId search attribute
 
 ## Expected Behavior

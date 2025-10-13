@@ -73,8 +73,8 @@ System.out.println("Status after approval: " + workflow.getStatus());
 
 ## Testing the Solution
 
-1. **Start Worker**: `./gradlew run -PmainClass=com.temporal.training.solution3.StartWorker`
-2. **Run Workflow**: `./gradlew run -PmainClass=com.temporal.training.solution3.StartWorkflow`
+1. **Start Worker**: `./gradlew execute -PmainClass=com.temporal.training.solution3.StartWorker`
+2. **Run Workflow**: `./gradlew execute -PmainClass=com.temporal.training.solution3.StartWorkflow`
 
 Expected output shows:
 - Initial status: PENDING

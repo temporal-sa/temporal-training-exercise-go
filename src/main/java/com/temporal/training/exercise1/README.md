@@ -29,8 +29,8 @@
 4. Run the workflow
 
 ## Running the Exercise
-1. Start worker: `./gradlew run -PmainClass=com.temporal.training.exercise1.StartWorker`
-2. Execute workflow: `./gradlew run -PmainClass=com.temporal.training.exercise1.StartWorkflow`
+1. Start worker: `./gradlew execute -PmainClass=com.temporal.training.exercise1.StartWorker`
+2. Execute workflow: `./gradlew execute -PmainClass=com.temporal.training.exercise1.StartWorkflow`
 
 ## Expected Output
 "Hello, Temporal!"

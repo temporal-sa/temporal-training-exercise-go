@@ -32,8 +32,8 @@
 - **Asynchronous Execution**: Starting workflows and querying while running
 
 ## Testing
-1. Start the worker: `./gradlew run -PmainClass=com.temporal.training.exercise3.StartWorker`
-2. Run the workflow: `./gradlew run -PmainClass=com.temporal.training.exercise3.StartWorkflow`
+1. Start the worker: `./gradlew execute -PmainClass=com.temporal.training.exercise3.StartWorker`
+2. Run the workflow: `./gradlew execute -PmainClass=com.temporal.training.exercise3.StartWorkflow`
 3. Observe status changes through query outputs
 
 ## Expected Output
