@@ -65,8 +65,6 @@ public class MoneyTransferWorkflowImpl implements MoneyTransferWorkflow {
     @Override
     public TransferStatus getStatus() {
         // TODO: Return current transfer status
-        return status;
+        return null;
     }
-    
-
 }
