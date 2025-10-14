@@ -52,6 +52,12 @@ temporal server start-dev --search-attribute AccountId=Text
 - Activity mocking with Mockito
 - Search attribute registration in tests
 
+### Exercise 7: Manual Activity Retry (40 min)
+- Manual retry pattern using signals
+- Invalid data handling scenarios
+- Disabling automatic retries
+- Interactive retry commands
+
 ## Running Exercises
 
 ### Exercise 1 (Hello Temporal)
@@ -100,6 +106,19 @@ temporal server start-dev --search-attribute AccountId=Text
 ./gradlew test --tests "com.temporal.training.exercise6.MoneyTransferWorkflowTest"
 ```
 
+### Exercise 7 (Manual Activity Retry)
+```bash
+# Start worker
+./gradlew execute -PmainClass=com.temporal.training.exercise7.StartWorker
+# Run workflow (in another terminal)
+./gradlew execute -PmainClass=com.temporal.training.exercise7.StartWorkflow
+# Send retry signal with corrected data
+temporal workflow signal \
+  --workflow-id money-transfer-workflow \
+  --name retry \
+  --input '{"key":"fromAccount","value":"account-123"}'
+```
+
 ## Running Solutions
 
 Replace `exercise` with `solution` in the class names above to run complete implementations.
@@ -114,3 +133,4 @@ Replace `exercise` with `solution` in the class names above to run complete impl
 - **Compensation**: Saga pattern for rollbacks
 - **Testing**: Time-skipping unit tests
 - **Error Handling**: Distinguishes activity vs workflow failures
+- **Manual Retry**: Signal-based retry for failed activities
