@@ -1,0 +1,5 @@
+{
+    "image": "temporalio/gitpod-edu:1.4",
+    "forwardPorts": [8233, 7233],
+    // "postStartCommand": "temporal server start-dev"
+}
