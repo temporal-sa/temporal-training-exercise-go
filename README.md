@@ -20,39 +20,39 @@ temporal server start-dev --search-attribute AccountId=Text
 
 ## Exercise Progression
 
-### Exercise 1: Hello Temporal (30 min)
+### [Exercise 1: Hello Temporal](src/main/java/com/temporal/training/exercise1) (30 min)
 - Basic Workflow and Activity setup
 - Worker registration and execution
 
-### Exercise 2: Money Transfer Basics (45 min)
+### [Exercise 2: Money Transfer Basics](src/main/java/com/temporal/training/exercise2) (45 min)
 - Multiple activities (withdraw, deposit, refund)
 - Signal-based approval mechanism
 - Workflow.await() for conditional waiting
 - Basic error handling and compensation
 
-### Exercise 3: Query Handlers (35 min)
+### [Exercise 3: Query Handlers](src/main/java/com/temporal/training/exercise3) (35 min)
 - Query methods for workflow state inspection
 - Status tracking throughout execution
 - External workflow monitoring
 - Signal vs Query differences
 
-### Exercise 4: Visibility & Monitoring (30 min)
+### [Exercise 4: Visibility & Monitoring](src/main/java/com/temporal/training/exercise4) (30 min)
 - Custom Search Attributes (AccountId)
 - Upsert Search Attributes from workflows
 - Workflow filtering and discovery
 
-### Exercise 5: User Metadata & Activity Summaries (30 min)
+### [Exercise 5: User Metadata & Activity Summaries](src/main/java/com/temporal/training/exercise5) (30 min)
 - Activity summaries for better observability
 - Static workflow summaries
 - Enhanced monitoring in Temporal Web UI
 
-### Exercise 6: Testing Strategy (45 min)
+### [Exercise 6: Testing Strategy](src/main/java/com/temporal/training/exercise6) (45 min)
 - Unit tests with TestWorkflowRule
 - Time skipping for fast tests
 - Activity mocking with Mockito
 - Search attribute registration in tests
 
-### Exercise 7: Manual Activity Retry (40 min)
+### [Exercise 7: Manual Activity Retry](src/main/java/com/temporal/training/exercise7) (40 min)
 - Manual retry pattern using signals
 - Invalid data handling scenarios
 - Disabling automatic retries
