@@ -34,7 +34,18 @@ func main() {
 		log.Fatalln("Unable to execute workflow", err)
 	}
 
-	time.Sleep(2 * time.Second)
+	time.Sleep(1 * time.Second)
+	var status exercise3.TransferStatus
+	resp, err := c.QueryWorkflow(context.Background(), we.GetID(), we.GetRunID(), "getStatus")
+	if err != nil {
+		log.Fatalln("Unable to query workflow", err)
+	}
+	err = resp.Get(&status)
+	if err != nil {
+		log.Fatalln("Unable to decode query result", err)
+	}
+	fmt.Println("Status:", status)
+
 	err = c.SignalWorkflow(context.Background(), we.GetID(), we.GetRunID(), "approve", true)
 	if err != nil {
 		log.Fatalln("Unable to signal workflow", err)

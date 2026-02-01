@@ -51,6 +51,7 @@ return "Transfer rejected and refunded", nil
 ```
 
 ## Key Concepts
-1. **Query Handlers**: Read-only workflow state inspection
+1. **Query Handlers**: Read-only workflow state inspection using `workflow.SetQueryHandler()`
 2. **Status Tracking**: Maintaining workflow state throughout execution
 3. **External Visibility**: Clients can monitor workflow progress
+4. **Signal vs Query**: Signals use `workflow.SetSignalChannel()` to modify state, Queries use `workflow.SetQueryHandler()` to read state

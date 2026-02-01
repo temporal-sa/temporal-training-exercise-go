@@ -9,8 +9,9 @@
 ## Tasks
 
 ### 1. Implement Query Handler (10 min)
-- Add `workflow.SetQueryHandler()` for "getStatus" query
-- Return current status from the handler
+- Add `workflow.SetQueryHandler(ctx, "getStatus", ...)` for "getStatus" query
+- Return current status and nil error from the handler function
+- Handle any errors from SetQueryHandler
 
 ### 2. Add Status Tracking (10 min)
 - Update status to `StatusApproved` when approval received
@@ -27,6 +28,14 @@
 1. Start the worker: `go run exercise3/worker/main.go`
 2. Run the workflow: `go run exercise3/starter/main.go`
 3. Observe status changes through query outputs
+
+### Query Using CLI
+You can also query the workflow status using the Temporal CLI:
+```bash
+temporal workflow query \
+  --workflow-id money-transfer-workflow \
+  --type getStatus
+```
 
 ## Expected Output
 - Initial status: PENDING
