@@ -1,0 +1,60 @@
+package main
+
+import (
+	"context"
+	"fmt"
+	"log"
+	"time"
+
+	"github.com/temporal/training/solution3"
+	"go.temporal.io/sdk/client"
+)
+
+func main() {
+	c, err := client.Dial(client.Options{})
+	if err != nil {
+		log.Fatalln("Unable to create client", err)
+	}
+	defer c.Close()
+
+	request := solution3.TransferRequest{
+		FromAccount: "account-123",
+		ToAccount:   "account-456",
+		Amount:      100.0,
+		TransferID:  "transfer-1",
+	}
+
+	options := client.StartWorkflowOptions{
+		ID:        "money-transfer-workflow",
+		TaskQueue: "money-transfer-task-queue",
+	}
+
+	we, err := c.ExecuteWorkflow(context.Background(), options, (&solution3.MoneyTransferWorkflow{}).Transfer, request)
+	if err != nil {
+		log.Fatalln("Unable to execute workflow", err)
+	}
+
+	time.Sleep(1 * time.Second)
+	var status solution3.TransferStatus
+	resp, err := c.QueryWorkflow(context.Background(), we.GetID(), we.GetRunID(), "getStatus")
+	if err != nil {
+		log.Fatalln("Unable to query workflow", err)
+	}
+	err = resp.Get(&status)
+	if err != nil {
+		log.Fatalln("Unable to decode query result", err)
+	}
+	fmt.Println("Status:", status)
+
+	err = c.SignalWorkflow(context.Background(), we.GetID(), we.GetRunID(), "approve", true)
+	if err != nil {
+		log.Fatalln("Unable to signal workflow", err)
+	}
+
+	var result string
+	err = we.Get(context.Background(), &result)
+	if err != nil {
+		log.Fatalln("Unable to get workflow result", err)
+	}
+	fmt.Println(result)
+}

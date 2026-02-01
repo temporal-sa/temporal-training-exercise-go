@@ -1,10 +1,30 @@
-# Temporal Training Exercise - Java Solution
+# Temporal Training Exercise - Go Solution
 
-Complete Java implementation for progressive Temporal training exercises.
+Complete Go implementation for progressive Temporal training exercises.
 
 ## Prerequisites
-- Java 17+
+- Go 1.21+
 - Temporal CLI
+
+### Installing Temporal CLI
+
+**macOS (Homebrew):**
+```bash
+brew install temporal
+```
+
+**Linux:**
+```bash
+curl -sSf https://temporal.download/cli.sh | sh
+```
+
+**Windows:**
+```powershell
+scoop install temporal-cli
+```
+
+**Or download directly:**
+Visit https://github.com/temporalio/cli/releases and download the appropriate binary for your platform.
 
 ## Setup
 
@@ -13,46 +33,45 @@ Complete Java implementation for progressive Temporal training exercises.
 temporal server start-dev --search-attribute AccountId=Text
 ```
 
-2. Build project:
+2. Install dependencies:
 ```bash
-./gradlew build
+go mod download
 ```
 
 ## Exercise Progression
 
-### [Exercise 1: Hello Temporal](src/main/java/com/temporal/training/exercise1) (30 min)
+### [Exercise 1: Hello Temporal](solution1/) (30 min)
 - Basic Workflow and Activity setup
 - Worker registration and execution
 
-### [Exercise 2: Money Transfer Basics](src/main/java/com/temporal/training/exercise2) (45 min)
+### [Exercise 2: Money Transfer Basics](solution2/) (45 min)
 - Multiple activities (withdraw, deposit, refund)
 - Signal-based approval mechanism
-- Workflow.await() for conditional waiting
+- workflow.Await() for conditional waiting
 - Basic error handling and compensation
 
-### [Exercise 3: Query Handlers](src/main/java/com/temporal/training/exercise3) (35 min)
+### [Exercise 3: Query Handlers](solution3/) (35 min)
 - Query methods for workflow state inspection
 - Status tracking throughout execution
 - External workflow monitoring
 - Signal vs Query differences
 
-### [Exercise 4: Visibility & Monitoring](src/main/java/com/temporal/training/exercise4) (30 min)
+### [Exercise 4: Visibility & Monitoring](solution4/) (30 min)
 - Custom Search Attributes (AccountId)
 - Upsert Search Attributes from workflows
 - Workflow filtering and discovery
 
-### [Exercise 5: User Metadata & Activity Summaries](src/main/java/com/temporal/training/exercise5) (30 min)
+### [Exercise 5: User Metadata & Activity Summaries](solution5/) (30 min)
 - Activity summaries for better observability
-- Static workflow summaries
 - Enhanced monitoring in Temporal Web UI
 
-### [Exercise 6: Testing Strategy](src/main/java/com/temporal/training/exercise6) (45 min)
-- Unit tests with TestWorkflowRule
+### [Exercise 6: Testing Strategy](solution6/) (45 min)
+- Unit tests with testsuite
 - Time skipping for fast tests
-- Activity mocking with Mockito
+- Activity mocking with testify/mock
 - Search attribute registration in tests
 
-### [Exercise 7: Manual Activity Retry](src/main/java/com/temporal/training/exercise7) (40 min)
+### [Exercise 7: Manual Activity Retry](solution7/) (40 min)
 - Manual retry pattern using signals
 - Invalid data handling scenarios
 - Disabling automatic retries
@@ -63,74 +82,92 @@ temporal server start-dev --search-attribute AccountId=Text
 ### Exercise 1 (Hello Temporal)
 ```bash
 # Start worker
-./gradlew execute -PmainClass=com.temporal.training.exercise1.StartWorker
+go run solution1/worker/main.go
 # Run workflow (in another terminal)
-./gradlew execute -PmainClass=com.temporal.training.exercise1.StartWorkflow
+go run solution1/starter/main.go
 ```
 
 ### Exercise 2 (Money Transfer Basics)
 ```bash
 # Start worker
-./gradlew execute -PmainClass=com.temporal.training.exercise2.StartWorker
+go run solution2/worker/main.go
 # Run workflow (in another terminal)
-./gradlew execute -PmainClass=com.temporal.training.exercise2.StartWorkflow
+go run solution2/starter/main.go
 ```
 
 ### Exercise 3 (Query Handlers)
 ```bash
 # Start worker
-./gradlew execute -PmainClass=com.temporal.training.exercise3.StartWorker
+go run solution3/worker/main.go
 # Run workflow (in another terminal)
-./gradlew execute -PmainClass=com.temporal.training.exercise3.StartWorkflow
+go run solution3/starter/main.go
 ```
 
 ### Exercise 4 (Visibility & Monitoring)
 ```bash
 # Start worker
-./gradlew execute -PmainClass=com.temporal.training.exercise4.StartWorker
+go run solution4/worker/main.go
 # Run workflow (in another terminal)
-./gradlew execute -PmainClass=com.temporal.training.exercise4.StartWorkflow
+go run solution4/starter/main.go
 ```
 
 ### Exercise 5 (User Metadata & Activity Summaries)
 ```bash
 # Start worker
-./gradlew execute -PmainClass=com.temporal.training.exercise5.StartWorker
+go run solution5/worker/main.go
 # Run workflow (in another terminal)
-./gradlew execute -PmainClass=com.temporal.training.exercise5.StartWorkflow
+go run solution5/starter/main.go
 ```
 
 ### Exercise 6 (Testing Strategy)
 ```bash
 # Run tests
-./gradlew test --tests "com.temporal.training.exercise6.MoneyTransferWorkflowTest"
+go test ./solution6 -v
 ```
 
 ### Exercise 7 (Manual Activity Retry)
 ```bash
 # Start worker
-./gradlew execute -PmainClass=com.temporal.training.exercise7.StartWorker
+go run solution7/worker/main.go
 # Run workflow (in another terminal)
-./gradlew execute -PmainClass=com.temporal.training.exercise7.StartWorkflow
-# Send retry signal with corrected data
+go run solution7/starter/main.go
+# Or send retry signal manually
 temporal workflow signal \
   --workflow-id money-transfer-workflow \
   --name retry \
-  --input '{"key":"fromAccount","value":"account-123"}'
+  --input '{"Key":"fromAccount","Value":"account-123"}'
 ```
-
-## Running Solutions
-
-Replace `exercise` with `solution` in the class names above to run complete implementations.
 
 ## Key Features Implemented
 
-- **Java 17 Records**: Modern data classes
+- **Go Structs**: Modern data structures
 - **Activity Retry**: Configurable retry policies
 - **Signal/Query**: Workflow interaction patterns
 - **Search Attributes**: Custom filtering
-- **User Metadata**: Activity context
+- **Activity Summaries**: Enhanced observability
 - **Compensation**: Saga pattern for rollbacks
-- **Testing**: Time-skipping unit tests
+- **Testing**: Time-skipping unit tests with testify
 - **Error Handling**: Distinguishes activity vs workflow failures
 - **Manual Retry**: Signal-based retry for failed activities
+
+## Project Structure
+
+```
+.
+├── solution1/          # Hello Temporal
+├── solution2/          # Money Transfer Basics
+├── solution3/          # Query Handlers
+├── solution4/          # Visibility & Monitoring
+├── solution5/          # Activity Summaries
+├── solution6/          # Testing Strategy
+├── solution7/          # Manual Activity Retry
+└── go.mod
+```
+
+Each solution contains:
+- `workflow.go` - Workflow implementation
+- `activities.go` - Activity implementations
+- `models.go` - Data structures
+- `worker/main.go` - Worker startup
+- `starter/main.go` - Workflow starter
+- `workflow_test.go` - Unit tests (solution6)

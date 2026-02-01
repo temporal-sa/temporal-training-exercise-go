@@ -1,36 +1,31 @@
-# Gradle
-.gradle/
-build/
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
 
-# Java
-*.class
-*.jar
-*.war
-*.ear
-*.nar
-hs_err_pid*
+# Test binary
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
 
 # IDE
 .idea/
-*.iml
-*.ipr
-*.iws
 .vscode/
-.settings/
-.project
-.classpath
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-logs/
-
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*.swo
-*~
+# Temporal
+.temporal/
