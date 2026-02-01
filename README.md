@@ -40,38 +40,38 @@ go mod download
 
 ## Exercise Progression
 
-### [Exercise 1: Hello Temporal](solution1/) (30 min)
+### [Exercise 1: Hello Temporal](exercise1/) (30 min)
 - Basic Workflow and Activity setup
 - Worker registration and execution
 
-### [Exercise 2: Money Transfer Basics](solution2/) (45 min)
+### [Exercise 2: Money Transfer Basics](exercise2/) (45 min)
 - Multiple activities (withdraw, deposit, refund)
 - Signal-based approval mechanism
 - workflow.Await() for conditional waiting
 - Basic error handling and compensation
 
-### [Exercise 3: Query Handlers](solution3/) (35 min)
+### [Exercise 3: Query Handlers](exercise3/) (35 min)
 - Query methods for workflow state inspection
 - Status tracking throughout execution
 - External workflow monitoring
 - Signal vs Query differences
 
-### [Exercise 4: Visibility & Monitoring](solution4/) (30 min)
+### [Exercise 4: Visibility & Monitoring](exercise4/) (30 min)
 - Custom Search Attributes (AccountId)
 - Upsert Search Attributes from workflows
 - Workflow filtering and discovery
 
-### [Exercise 5: User Metadata & Activity Summaries](solution5/) (30 min)
+### [Exercise 5: User Metadata & Activity Summaries](exercise5/) (30 min)
 - Activity summaries for better observability
 - Enhanced monitoring in Temporal Web UI
 
-### [Exercise 6: Testing Strategy](solution6/) (45 min)
+### [Exercise 6: Testing Strategy](exercise6/) (45 min)
 - Unit tests with testsuite
 - Time skipping for fast tests
 - Activity mocking with testify/mock
 - Search attribute registration in tests
 
-### [Exercise 7: Manual Activity Retry](solution7/) (40 min)
+### [Exercise 7: Manual Activity Retry](exercise7/) (40 min)
 - Manual retry pattern using signals
 - Invalid data handling scenarios
 - Disabling automatic retries
