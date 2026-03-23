@@ -1,0 +1,37 @@
+apiVersion: temporal.io/v1alpha1
+kind: TemporalWorkerDeployment
+metadata:
+  name: hello-world
+  namespace: hello-world
+  labels:
+    app: hello-world
+spec:
+  replicas: 3
+  workerOptions:
+    connectionRef:
+      name: temporal
+    temporalNamespace: default
+  # Start with Progressive strategy using conservative ramp percentages
+  rollout:
+    strategy: Progressive
+    steps:
+      - rampPercentage: 1
+        pauseDuration: 30s
+      - rampPercentage: 5
+        pauseDuration: 30s
+      - rampPercentage: 25
+        pauseDuration: 30s
+  sunset:
+    scaledownDelay: 30s
+    deleteDelay: 2m
+  template:
+    spec:
+      containers:
+      - name: worker
+        image: hello-world:version-a
+        # image: hello-world:version-b
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+        # Note: Controller automatically adds TEMPORAL_* env vars
