@@ -3,19 +3,18 @@ package main
 import (
 	"log"
 	"os"
-	exercise8 "versioning/versionB"
+	versionb "versioning/versionB"
 
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 	"go.temporal.io/sdk/workflow"
 )
 
-const TaskQueue = "hello-task-queue"
+const TaskQueue = "driver-tracking"
 
 func main() {
 	c, err := client.Dial(client.Options{
 		HostPort: "host.minikube.internal:7233",
-		// HostPort: "localhost:7233",
 	})
 	if err != nil {
 		log.Fatalln("Unable to create client", err)
@@ -33,8 +32,6 @@ func main() {
 	deploymentOptions := worker.DeploymentOptions{
 		UseVersioning: true,
 		Version: worker.WorkerDeploymentVersion{
-			// DeploymentName: "hello-world/hello-world",
-			// BuildID:        "version-b",
 			DeploymentName: deploymentName,
 			BuildID:        buildID,
 		},
@@ -45,9 +42,9 @@ func main() {
 	w := worker.New(c, TaskQueue, worker.Options{
 		DeploymentOptions: deploymentOptions,
 	})
-	w.RegisterWorkflow(exercise8.Greet)
-	w.RegisterActivity(exercise8.CreateGreeting)
-	w.RegisterActivity(exercise8.Uppercase)
+	w.RegisterWorkflow(versionb.TrackDriverLocation)
+	w.RegisterActivity(versionb.RecordDriverLocation)
+	w.RegisterActivity(versionb.CheckGeofence)
 
 	err = w.Run(worker.InterruptCh())
 	if err != nil {

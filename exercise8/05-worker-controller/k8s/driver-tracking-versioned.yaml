@@ -1,10 +1,10 @@
 apiVersion: temporal.io/v1alpha1
 kind: TemporalWorkerDeployment
 metadata:
-  name: hello-world
-  namespace: hello-world
+  name: example
+  namespace: driver-tracking
   labels:
-    app: hello-world
+    app: driver-tracking
 spec:
   replicas: 3
   workerOptions:
@@ -15,12 +15,16 @@ spec:
   rollout:
     strategy: Progressive
     steps:
-      - rampPercentage: 1
+      # - rampPercentage: 1
+      #   pauseDuration: 30s
+      # - rampPercentage: 5
+      #   pauseDuration: 30s
+      # - rampPercentage: 25
+      #   pauseDuration: 30s
+      - rampPercentage: 50
         pauseDuration: 30s
-      - rampPercentage: 5
-        pauseDuration: 30s
-      - rampPercentage: 25
-        pauseDuration: 30s
+    # gate:
+    #   workflowType: TrackDriverLocation
   sunset:
     scaledownDelay: 30s
     deleteDelay: 2m

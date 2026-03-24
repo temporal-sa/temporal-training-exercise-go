@@ -1,14 +1,17 @@
-package exercise8
+package versionb
 
 import (
 	"fmt"
-	"strings"
+	"math/rand"
 )
 
-func CreateGreeting(name string) (string, error) {
-	return fmt.Sprintf("Hello, %s!", name), nil
+func RecordDriverLocation(driverID string) (string, error) {
+	lat := 1.3521 + (rand.Float64()-0.5)*0.05
+	lng := 103.8198 + (rand.Float64()-0.5)*0.05
+	return fmt.Sprintf("Driver %s at (%.4f, %.4f)", driverID, lat, lng), nil
 }
 
-func Uppercase(name string) (string, error) {
-	return strings.ToUpper(name), nil
+func CheckGeofence(lat float64, lng float64) (bool, error) {
+	// Simulate proximity check - 20% chance driver has arrived
+	return rand.Float64() < 0.2, nil
 }

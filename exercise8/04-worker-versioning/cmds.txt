@@ -1,0 +1,31 @@
+temporal worker deployment describe --name example
+
+temporal worker deployment set-current-version \
+--deployment-name example \
+--build-id version-a
+
+temporal workflow update-options \
+--workflow-id <> \
+--versioning-override-behavior pinned \
+--versioning-override-deployment-name example \
+--versioning-override-build-id version-b
+
+temporal worker deployment set-ramping-version \
+--deployment-name example \
+--build-id version-b \
+--percentage 50
+
+temporal workflow update-options \
+--query "WorkflowType='TrackDriverLocation'" \
+--versioning-override-behavior pinned \
+--versioning-override-deployment-name example \
+--versioning-override-build-id version-b
+
+temporal workflow update-options \
+--query "WorkflowType='TrackDriverLocation'" \
+--versioning-override-behavior auto_upgrade
+
+# Remove Workflows on previous version to show 'drained' status
+
+temporal workflow delete \
+--query "TemporalWorkerDeploymentVersion='example:version-a'"

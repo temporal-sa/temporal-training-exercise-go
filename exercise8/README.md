@@ -8,7 +8,7 @@
 ## Exercises
 
 ### Workflow Type Versioning
-These must be run from the `01-workflow-type-versioning` directory
+This exercise must be run from the `01-workflow-type-versioning` directory
 
 1. Start the Worker: `go run ./worker`
 2. Start a `Greet` workflow from the UI, or via the CLI: `temporal workflow start --task-queue hello-task-queue --type Greet --input "\"Temporal\""`
@@ -32,7 +32,7 @@ These must be run from the `01-workflow-type-versioning` directory
 
 
 ### Task Queue Versioning
-These must be run from the `02-task-queue-versioning` directory
+This exercise must be run from the `02-task-queue-versioning` directory
 
 1. Start the Worker: `go run ./worker`
 2. Start a `Greet` workflow from the UI, or via the CLI: `temporal workflow start --task-queue hello-task-queue --type Greet --input "\"Temporal\""`
@@ -56,7 +56,7 @@ These must be run from the `02-task-queue-versioning` directory
 
  
 ### Patching API
-These must be run from the `03-patching` directory
+This exercise must be run from the `03-patching` directory
 
 1. Start the Worker: `go run ./worker`
 2. Start a `Greet` workflow from the UI, or via the CLI: `temporal workflow start --task-queue hello-task-queue --type Greet --input "\"Temporal\""`
@@ -66,8 +66,26 @@ These must be run from the `03-patching` directory
 
 
 ### Worker Versioning
-Instructions coming soon!
+This exercise must be run from the `04-worker-versioning` directory
+
+Instructions provided during training. The instructor will discuss;
+
+1. Deployments, build ids, and versioning behaviour.
+2. Setting the versioning behaviour on the Worker and on Workflows.
+3. Setting the current version for a deployment.
+4. Setting the ramping version for a deployment.
+
+#### Pinned Workflows
+
+1. Manually changing a Workflow's version.
+2. Manually changing the version for a group of Workflows.
+3. Manually changing a Workflow's behaviour to Auto Upgrade.
+3. Using continue-as-new to move a Workflow Execution to Auto Upgrade.
+
+#### Auto Upgrade
+
+1. Using ramping to upgrade Workflows.
 
 
 ### Worker Controller
-Instructions coming soon!
+Instructions provided during training.

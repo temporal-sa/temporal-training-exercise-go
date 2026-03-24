@@ -2,6 +2,6 @@ apiVersion: temporal.io/v1alpha1
 kind: TemporalConnection
 metadata:
   name: temporal
-  namespace: hello-world
+  namespace: driver-tracking
 spec:
   hostPort: "host.minikube.internal:7233"

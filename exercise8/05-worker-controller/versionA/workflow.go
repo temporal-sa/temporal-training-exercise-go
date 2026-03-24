@@ -1,4 +1,4 @@
-package exercise8
+package versiona
 
 import (
 	"time"
@@ -6,24 +6,44 @@ import (
 	"go.temporal.io/sdk/workflow"
 )
 
-func Greet(ctx workflow.Context, name string) (string, error) {
+var forceContinueAsNew bool
+
+func TrackDriverLocation(ctx workflow.Context, driverID string, lastIter int) (string, error) {
+	setupSignal(ctx)
+
 	ao := workflow.ActivityOptions{StartToCloseTimeout: 5 * time.Second}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
-	var result string
 	var err error
 
-	// v := workflow.GetVersion(ctx, "AddUppercase", workflow.DefaultVersion, 1)
-	// if v == workflow.DefaultVersion {
+	// Version A of this workflow pings every 60 seconds.
+	// Version B of this workflow pings every 1 second.
+	for i := lastIter; i < 30; i++ {
+		if forceContinueAsNew {
+			return "", workflow.NewContinueAsNewErrorWithOptions(ctx, workflow.ContinueAsNewErrorOptions{
+				InitialVersioningBehavior: workflow.ContinueAsNewVersioningBehaviorAutoUpgrade,
+			}, TrackDriverLocation, driverID, i)
+		}
 
-	// } else {
-	// 	err = workflow.ExecuteActivity(ctx, Uppercase, name).Get(ctx, &name)
-	// }
+		var recordResult string
+		err = workflow.ExecuteActivity(ctx, RecordDriverLocation, driverID).Get(ctx, &recordResult)
 
-	for range 30 {
-		err = workflow.ExecuteActivity(ctx, CreateGreeting, name).Get(ctx, &result)
 		workflow.Sleep(ctx, 60*time.Second)
 	}
 
-	return result, err
+	return "Session complete", err
+}
+
+func setupSignal(ctx workflow.Context) {
+	signalChan := workflow.GetSignalChannel(ctx, "force-continue-as-new")
+	workflow.Go(ctx, func(ctx workflow.Context) {
+		for {
+			selector := workflow.NewSelector(ctx)
+			selector.AddReceive(signalChan, func(c workflow.ReceiveChannel, more bool) {
+				c.Receive(ctx, nil)
+				forceContinueAsNew = true
+			})
+			selector.Select(ctx)
+		}
+	})
 }
