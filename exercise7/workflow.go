@@ -46,14 +46,14 @@ func (w *MoneyTransferWorkflow) Transfer(ctx workflow.Context, request TransferR
 		return "", err
 	}
 
-	err = workflow.SetSignalChannel(ctx, "approve", func(ctx workflow.Context, value bool) {
+	approvalChannel := workflow.GetSignalChannel(ctx, "approve")
+	workflow.Go(ctx, func(ctx workflow.Context) {
+		var value bool
+		approvalChannel.Receive(ctx, &value)
 		logger.Info("Approval received", "approved", value)
 		approved = value
 		approvalReceived = true
 	})
-	if err != nil {
-		return "", err
-	}
 
 	// TODO: Set up signal channel for "retry" that handles RetryUpdate
 	// Use workflow.GetSignalChannel and workflow.Go with a loop

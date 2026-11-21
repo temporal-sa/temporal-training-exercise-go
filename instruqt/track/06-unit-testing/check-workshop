@@ -1,0 +1,37 @@
+#!/bin/bash
+# ABOUTME: Check script. Write-it-yourself style: exercise6 ships with no
+# test file at all.
+# Gate 1: a _test.go file exists and uses the Temporal testsuite.
+# Gate 2: `go test ./exercise6` passes with at least two passing tests.
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
+
+export HOME="${HOME:-/root}" GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/usr/local/bin:$PATH"
+cd /root/workshop || fail "Workshop directory is missing."
+
+EX=exercise6
+
+if ! ls "$EX"/*_test.go >/dev/null 2>&1; then
+    fail "No test file in $EX. Create $EX/workflow_test.go, then check again."
+fi
+pass "Test file present"
+
+if ! grep -q 'go.temporal.io/sdk/testsuite' "$EX"/*_test.go 2>/dev/null; then
+    fail "The tests in $EX do not import go.temporal.io/sdk/testsuite. Use its test Workflow environment so time skipping and Activity mocks are available."
+fi
+pass "Tests use the Temporal testsuite"
+
+if ! OUT=$(timeout 300 go test -count=1 -v ./$EX 2>&1); then
+    echo "$OUT" | tail -25
+    fail "go test ./$EX did not pass. Fix the failures above, then check again."
+fi
+
+# Every `--- PASS` line counts, testify suite methods (indented) included.
+PASSED=$(echo "$OUT" | grep -cE '^\s*--- PASS' || true)
+if [ "${PASSED:-0}" -lt 2 ]; then
+    echo "$OUT" | tail -10
+    fail "Only ${PASSED:-0} passing test found. Cover at least the approved and the rejected transfer."
+fi
+pass "go test ./$EX passes ($PASSED passing)"
+echo "$OUT" | grep -E '^\s*--- (PASS|FAIL)' | head -20

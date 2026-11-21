@@ -1,0 +1,16 @@
+#!/bin/bash
+# ABOUTME: Solve script. Copies the finished test suite in so the check passes.
+# Runs on Skip and on `instruqt track test`.
+#
+# Only the test file comes across. exercise6's Workflow is already complete
+# (it is the exercise 1-5 feature set) and solution6's tests run against it
+# unchanged once the package name is rewritten.
+set -uo pipefail
+export HOME="${HOME:-/root}" GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/usr/local/bin:$PATH"
+cd /root/workshop || exit 0
+
+sed 's/solution6/exercise6/g' solution6/workflow_test.go > exercise6/workflow_test.go
+
+timeout 300 go test -count=1 ./exercise6 || true
+exit 0

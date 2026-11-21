@@ -1,0 +1,8 @@
+{
+  "kill_all": false,
+  "services": {
+    "goproxy": true,
+    "github": true,
+    "httpbin": true
+  }
+}

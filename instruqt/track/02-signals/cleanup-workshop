@@ -1,0 +1,13 @@
+#!/bin/bash
+# ABOUTME: Per-challenge cleanup. Kill the Worker and the starter.
+# One pkill pattern per line.
+set -uo pipefail
+
+pkill -f "go run"     2>/dev/null || true
+pkill -f "/exe/worker"  2>/dev/null || true
+pkill -f "/exe/starter" 2>/dev/null || true
+pkill -f "/exe/main"    2>/dev/null || true
+pkill -f "/tmp/solve/"  2>/dev/null || true
+sleep 1
+
+echo "Exercise 2 cleanup: OK"

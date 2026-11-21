@@ -1,0 +1,23 @@
+name: Temporal in Practice Sandbox - Go
+slug: temporal-in-practice-sandbox-go
+description: |-
+  Go 1.24 workshop sandbox for the Temporal in Practice track.
+
+  scripts/setup-workshop installs the toolchain (git, Go, the Temporal CLI,
+  mitmproxy), clones the exercise repo, warms the Go module and build caches,
+  and starts the Temporal dev server with the AccountId search attribute
+  registered.
+
+  Pushed and published independently of the track:
+    instruqt sandbox push
+    instruqt sandbox publish --message="..."
+containers:
+- name: workshop
+  image: ubuntu:24.04
+  shell: /bin/bash
+  memory: 4096
+  # Every port a challenge tab points at. Instruqt's proxy returns HTTP 572
+  # (target host connection failed) for ports that are not listed here.
+  ports:
+  - 5000   # Network Control Panel
+  - 8233   # Temporal Web UI

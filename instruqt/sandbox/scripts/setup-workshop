@@ -1,0 +1,224 @@
+#!/bin/bash
+# ABOUTME: Sandbox preset setup script. Provisions the whole workshop sandbox.
+#
+# This is the preset's lifecycle script, named for the container in
+# ../config.yml. It ships with `instruqt sandbox push` + `instruqt sandbox
+# publish`, NOT with `instruqt track push`.
+#
+# Because it arrives with the preset rather than inside a git clone, it can
+# install its own dependencies, git included. The base image is relied on for
+# nothing beyond a Debian userland.
+#
+# Steps:
+#   1. System packages, git included
+#   2. Clone the exercise repo
+#   3. Go toolchain
+#   4. Temporal CLI
+#   5. Go module download and build cache warm-up
+#   6. uv, mitmproxy, Flask and the mitmproxy CA cert
+#   7. The network control panel
+#   8. Environment for every shell
+#   9. Start the proxy, the control panel and the Temporal dev server
+#
+# See ../README.md for how to ship a change to this file.
+set -euo pipefail
+
+# Pin WORKSHOP_REF to a tag or a commit before a live workshop so every
+# attendee gets the same code regardless of what landed on main that morning.
+WORKSHOP_REPO="${WORKSHOP_REPO:-https://github.com/temporal-sa/temporal-training-exercise-go.git}"
+WORKSHOP_REF="${WORKSHOP_REF:-main}"
+WORKSHOP_DIR="${WORKSHOP_DIR:-/root/workshop}"
+# Keep in step with the `toolchain` line in go.mod. Any release at or above it
+# works; GOTOOLCHAIN=local (step 3) stops Go from fetching a different one.
+GO_VERSION="1.24.13"
+# uv only provisions the interpreter for mitmproxy and the control panel. The
+# exercises themselves are pure Go.
+PROXY_PYTHON_VERSION="3.12"
+
+log() { echo "==> $*"; }
+
+# Lifecycle scripts can run without HOME. Go needs it for GOPATH and GOCACHE.
+export HOME="${HOME:-/root}"
+
+# 0. Wait for Instruqt host bootstrap.
+until [ -f /opt/instruqt/bootstrap/host-bootstrap-completed ]; do
+    sleep 1
+done
+
+# 1. System packages. The complete list, git included: nothing here is
+#    inherited from the base image, so add a new binary dependency to this
+#    list and nowhere else.
+log "Installing system packages"
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq
+apt-get install -y -qq --no-install-recommends \
+    ca-certificates \
+    curl \
+    git \
+    jq \
+    unzip \
+    less \
+    vim-tiny \
+    nano \
+    bash-completion
+
+# 2. Clone the exercise repo. Skipped when the directory exists, which is how
+#    a local test run points the sandbox at an uncommitted working tree.
+if [ ! -d "${WORKSHOP_DIR}" ]; then
+    log "Cloning ${WORKSHOP_REPO} at ${WORKSHOP_REF}"
+    git clone --depth 1 --branch "${WORKSHOP_REF}" "${WORKSHOP_REPO}" "${WORKSHOP_DIR}"
+else
+    log "${WORKSHOP_DIR} already exists, skipping the clone"
+fi
+
+# 3. Go toolchain, from the official tarball rather than apt so this script
+#    pins the version. Symlinked into /usr/local/bin because check and solve
+#    scripts run non-interactively and never source a profile.
+#
+#    GOTOOLCHAIN=local goes in $GOROOT/go.env, which every go invocation reads
+#    regardless of HOME or profile. Without it, a go.mod `toolchain` line newer
+#    than GO_VERSION makes the first `go run` download a second toolchain.
+case "$(dpkg --print-architecture)" in
+    amd64) GO_ARCH=amd64 ;;
+    arm64) GO_ARCH=arm64 ;;
+    *) echo "ERROR: unsupported architecture $(dpkg --print-architecture)" >&2; exit 1 ;;
+esac
+log "Installing Go ${GO_VERSION} (${GO_ARCH})"
+rm -rf /usr/local/go
+curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GO_ARCH}.tar.gz" | tar -C /usr/local -xzf -
+ln -sf /usr/local/go/bin/go /usr/local/bin/go
+ln -sf /usr/local/go/bin/gofmt /usr/local/bin/gofmt
+sed -i 's/^GOTOOLCHAIN=.*/GOTOOLCHAIN=local/' /usr/local/go/go.env
+grep -q '^GOTOOLCHAIN=local' /usr/local/go/go.env || echo 'GOTOOLCHAIN=local' >> /usr/local/go/go.env
+go version
+
+# 4. Temporal CLI.
+log "Installing the Temporal CLI"
+curl -sSf https://temporal.download/cli.sh | sh
+ln -sf /root/.temporalio/bin/temporal /usr/local/bin/temporal
+
+# 5. Module download and build cache. Every exercise links the same SDK, so
+#    compiling the solutions once puts the SDK and its dependencies in
+#    GOCACHE. The learner's first `go run` then compiles only their own
+#    package, in a second or two, instead of the whole dependency graph.
+#    Exercises are skipped: most do not compile until their TODOs are done.
+log "Downloading Go modules and warming the build cache"
+cd "${WORKSHOP_DIR}"
+go mod download
+go build ./solution...
+go test -count=1 ./solution6 >/dev/null
+
+# 6. mitmproxy and Flask, in their own venv. uv provisions the interpreter so
+#    nothing depends on the base image shipping Python.
+log "Installing uv, mitmproxy and the control panel dependencies"
+curl -LsSf https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=/usr/local/bin sh
+uv python install "${PROXY_PYTHON_VERSION}"
+uv venv --python "${PROXY_PYTHON_VERSION}" /opt/proxy-venv
+VIRTUAL_ENV=/opt/proxy-venv uv pip install --quiet mitmproxy flask
+ln -sf /opt/proxy-venv/bin/mitmdump /usr/local/bin/mitmdump
+
+# Generate the CA cert by starting mitmdump briefly, then trust it
+# system-wide. Go's crypto/x509 reads /etc/ssl/certs/ca-certificates.crt on
+# Linux, so `go get` through the proxy validates with no further patching.
+log "Generating and trusting the mitmproxy CA cert"
+mitmdump --listen-port 8889 --set block_global=false > /tmp/mitm-init.log 2>&1 &
+MITM_INIT_PID=$!
+for _ in $(seq 1 30); do
+    [ -f /root/.mitmproxy/mitmproxy-ca-cert.pem ] && break
+    sleep 1
+done
+kill "${MITM_INIT_PID}" 2>/dev/null || true
+wait "${MITM_INIT_PID}" 2>/dev/null || true
+
+MITM_CA=/root/.mitmproxy/mitmproxy-ca-cert.pem
+cp "${MITM_CA}" /usr/local/share/ca-certificates/mitmproxy-ca.crt
+update-ca-certificates
+
+# 7. Network control panel. These files come from the clone, so WORKSHOP_REF
+#    has to name a ref that contains instruqt/sandbox/proxy/. The addon and
+#    the panel both read and write /root/proxy/state.json, so they get a
+#    writable copy of their own.
+PROXY_SRC="${WORKSHOP_DIR}/instruqt/sandbox/proxy"
+if [ ! -d "${PROXY_SRC}" ]; then
+    echo "ERROR: ${PROXY_SRC} is missing." >&2
+    echo "       WORKSHOP_REF=${WORKSHOP_REF} does not contain instruqt/sandbox/proxy/." >&2
+    exit 1
+fi
+
+log "Staging the network control panel"
+mkdir -p /root/proxy/static
+cp -r "${PROXY_SRC}/." /root/proxy/
+
+# 8. Environment for every shell.
+#    /etc/profile.d covers login shells and the /etc/bash.bashrc line covers
+#    interactive non-login shells, which is what Instruqt's terminal tabs
+#    open. Putting them only in /etc/bash.bashrc does not work: Ubuntu's
+#    /root/.bashrc returns early for non-interactive shells.
+#
+#    NO_PROXY keeps loopback traffic off mitmproxy. grpc-go honours
+#    HTTPS_PROXY, so without it the SDK's connection to localhost:7233 would
+#    be sent to the proxy and fail.
+log "Writing shell environment"
+cat > /etc/profile.d/workshop.sh << EOF
+export TEMPORAL_ADDRESS="127.0.0.1:7233"
+export GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/root/go/bin:\$PATH"
+export HTTP_PROXY="http://127.0.0.1:8888"
+export HTTPS_PROXY="http://127.0.0.1:8888"
+export http_proxy="http://127.0.0.1:8888"
+export https_proxy="http://127.0.0.1:8888"
+export NO_PROXY="127.0.0.1,localhost"
+export no_proxy="127.0.0.1,localhost"
+export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+export NODE_EXTRA_CA_CERTS=${MITM_CA}
+EOF
+chmod 0644 /etc/profile.d/workshop.sh
+
+if ! grep -q 'profile.d/workshop.sh' /etc/bash.bashrc 2>/dev/null; then
+    cat >> /etc/bash.bashrc << EOF
+
+# Workshop environment
+[ -f /etc/profile.d/workshop.sh ] && . /etc/profile.d/workshop.sh
+[ -f /usr/share/bash-completion/bash_completion ] && . /usr/share/bash-completion/bash_completion
+cd ${WORKSHOP_DIR} 2>/dev/null || true
+EOF
+fi
+
+# 9. Start background services.
+log "Starting the proxy and the control panel"
+nohup mitmdump \
+    --listen-port 8888 \
+    --set block_global=false \
+    --set ssl_insecure=false \
+    -s /root/proxy/toggle_addon.py \
+    > /tmp/proxy.log 2>&1 &
+
+nohup /opt/proxy-venv/bin/python /root/proxy/controlpanel.py \
+    > /tmp/controlpanel.log 2>&1 &
+
+# AccountId is registered up front because exercise 4 upserts it as a search
+# attribute. A dev server started without it fails that Workflow Task.
+log "Starting the Temporal dev server"
+nohup temporal server start-dev \
+    --ip 0.0.0.0 \
+    --db-filename /root/temporal.db \
+    --search-attribute AccountId=Text \
+    --log-level warn \
+    > /tmp/temporal-server.log 2>&1 &
+
+HEALTHY=false
+for _ in $(seq 1 60); do
+    if temporal operator cluster health --address 127.0.0.1:7233 >/dev/null 2>&1; then
+        HEALTHY=true
+        break
+    fi
+    sleep 1
+done
+if [ "${HEALTHY}" != true ]; then
+    echo "ERROR: Temporal dev server did not become healthy. See /tmp/temporal-server.log." >&2
+    tail -20 /tmp/temporal-server.log >&2 || true
+    exit 1
+fi
+log "Temporal server healthy"
+
+log "Sandbox provisioning complete."

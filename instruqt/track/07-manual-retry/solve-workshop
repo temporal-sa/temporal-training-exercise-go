@@ -1,0 +1,58 @@
+#!/bin/bash
+# ABOUTME: Solve script. Copies the finished code in, then walks the whole
+# manual retry path: a deposit to a bad account fails once, the Workflow
+# parks in RETRYING, a retry Signal corrects the account, and the transfer
+# completes. Runs on Skip and on `instruqt track test`.
+#
+# solution7's Activities fail deterministically on "invalid-account", so the
+# transfer is started from the CLI with that target instead of through the
+# shipped starter, which uses two valid accounts.
+set -uo pipefail
+export HOME="${HOME:-/root}" GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/usr/local/bin:$PATH"
+cd /root/workshop || exit 0
+
+T=(--address 127.0.0.1:7233 --namespace default)
+WF=money-transfer-workflow
+
+(cd solution7 && find . -name '*.go') | while read -r f; do
+    mkdir -p "exercise7/$(dirname "$f")"
+    sed 's/solution7/exercise7/g' "solution7/$f" > "exercise7/$f"
+done
+
+pkill -f "go run"     2>/dev/null || true
+pkill -f "/exe/worker"  2>/dev/null || true
+pkill -f "/tmp/solve/"  2>/dev/null || true
+temporal workflow terminate "${T[@]}" --workflow-id "$WF" --reason "Exercise 7 solve" >/dev/null 2>&1 || true
+sleep 1
+
+mkdir -p /tmp/solve
+go build -o /tmp/solve/worker-07 ./exercise7/worker || exit 0
+
+/tmp/solve/worker-07 > /tmp/solve-07-worker.log 2>&1 &
+WORKER_PID=$!
+sleep 3
+
+temporal workflow start "${T[@]}" \
+    --type Transfer \
+    --task-queue money-transfer-task-queue \
+    --workflow-id "$WF" \
+    --input '{"FromAccount":"account-123","ToAccount":"invalid-account","Amount":100,"TransferID":"transfer-solve"}'
+
+temporal workflow signal "${T[@]}" --workflow-id "$WF" --name approve --input true
+
+for _ in $(seq 1 30); do
+    STATUS=$(temporal workflow query "${T[@]}" --workflow-id "$WF" --name getStatus -o json 2>/dev/null \
+        | jq -r '.queryResult[0] // empty' 2>/dev/null)
+    [ "$STATUS" = "RETRYING" ] && break
+    sleep 1
+done
+echo "Status before the retry Signal: ${STATUS:-unknown}"
+
+temporal workflow signal "${T[@]}" --workflow-id "$WF" --name retry \
+    --input '{"Key":"toAccount","Value":"account-456"}'
+
+timeout 60 temporal workflow result "${T[@]}" --workflow-id "$WF"
+
+kill "$WORKER_PID" 2>/dev/null || true
+exit 0

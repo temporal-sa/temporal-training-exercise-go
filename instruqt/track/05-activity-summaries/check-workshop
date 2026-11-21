@@ -1,0 +1,50 @@
+#!/bin/bash
+# ABOUTME: Check script. Fill-in-the-blanks style.
+# Gate 1: TODOs gone. Gate 2: compiles, and all three ActivityOptions carry
+# a Summary. Gate 3: a transfer completed since this chapter started, and
+# every Activity it scheduled has a summary in the event history.
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
+
+export HOME="${HOME:-/root}" GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/usr/local/bin:$PATH"
+cd /root/workshop || fail "Workshop directory is missing."
+
+EX=exercise5
+SINCE=$(cat /tmp/workshop-start-05 2>/dev/null || echo "1970-01-01T00:00:00Z")
+T=(--address 127.0.0.1:7233 --namespace default)
+
+if grep -q "TODO" "$EX/workflow.go" 2>/dev/null; then
+    fail "$EX/workflow.go still has TODO comments. Implement them, delete the comments, then check again."
+fi
+pass "All TODOs implemented"
+
+if ! OUT=$(go build ./$EX/... 2>&1); then
+    echo "$OUT" | tail -15
+    fail "$EX does not compile. Fix the errors above, then check again."
+fi
+pass "$EX compiles"
+
+SUMMARIES=$(grep -c 'Summary:' "$EX/workflow.go" 2>/dev/null || true)
+if [ "${SUMMARIES:-0}" -lt 3 ]; then
+    fail "Found ${SUMMARIES:-0} Summary fields in $EX/workflow.go. All three ActivityOptions (withdraw, deposit, refund) need one."
+fi
+pass "All three ActivityOptions carry a Summary"
+
+COMPLETED=$(temporal workflow count "${T[@]}" -o json \
+    --query "WorkflowId=\"money-transfer-workflow\" AND ExecutionStatus=\"Completed\" AND StartTime > \"$SINCE\"" \
+    2>/dev/null | jq -r '.count // 0' 2>/dev/null)
+if [ "${COMPLETED:-0}" -lt 1 ]; then
+    fail "No completed money transfer yet. Start the Worker, run the starter, and wait for the result to print."
+fi
+pass "Money transfer Workflow completed"
+
+# Restart the Worker after editing: a Worker still running the old binary
+# schedules Activities without summaries even though the source has them.
+LABELLED=$(temporal workflow show "${T[@]}" --workflow-id money-transfer-workflow -o json 2>/dev/null \
+    | jq '[.events[] | select(.eventType == "EVENT_TYPE_ACTIVITY_TASK_SCHEDULED")]
+          | length > 0 and all(.userMetadata.summary != null)' 2>/dev/null)
+if [ "$LABELLED" != "true" ]; then
+    fail "The latest transfer scheduled Activities without a summary. Restart the Worker so it runs your edited code, then run the starter again."
+fi
+pass "Every scheduled Activity has a summary in the event history"

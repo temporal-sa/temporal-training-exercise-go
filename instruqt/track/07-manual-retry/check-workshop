@@ -1,0 +1,54 @@
+#!/bin/bash
+# ABOUTME: Check script. Fill-in-the-blanks style.
+# Gate 1: TODOs gone from workflow.go.
+# Gate 2: compiles, automatic retry disabled, retry Signal channel present.
+# Gate 3: a transfer completed since this chapter started.
+# The manual retry path itself is not required to pass, because the shipped
+# Activities only fail at random, but the check says whether it was used.
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
+
+export HOME="${HOME:-/root}" GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/usr/local/bin:$PATH"
+cd /root/workshop || fail "Workshop directory is missing."
+
+EX=exercise7
+SINCE=$(cat /tmp/workshop-start-07 2>/dev/null || echo "1970-01-01T00:00:00Z")
+T=(--address 127.0.0.1:7233 --namespace default)
+
+if grep -q "TODO" "$EX/workflow.go" 2>/dev/null; then
+    fail "$EX/workflow.go still has TODO comments. Implement them, delete the comments, then check again."
+fi
+pass "All TODOs implemented"
+
+if ! OUT=$(go build ./$EX/... 2>&1); then
+    echo "$OUT" | tail -15
+    fail "$EX does not compile. Fix the errors above, then check again."
+fi
+pass "$EX compiles"
+
+if ! grep -qE 'MaximumAttempts:[[:space:]]*1\b' "$EX/workflow.go" 2>/dev/null; then
+    fail "$EX/workflow.go does not set MaximumAttempts: 1 in a RetryPolicy. Automatic retry will keep hammering the bad account."
+fi
+pass "Automatic Activity retry disabled"
+
+if ! grep -q 'GetSignalChannel(ctx, "retry")' "$EX/workflow.go" 2>/dev/null; then
+    fail "$EX/workflow.go never listens on a \"retry\" Signal channel."
+fi
+pass "retry Signal channel present"
+
+COMPLETED=$(temporal workflow count "${T[@]}" -o json \
+    --query "WorkflowId=\"money-transfer-workflow\" AND ExecutionStatus=\"Completed\" AND StartTime > \"$SINCE\"" \
+    2>/dev/null | jq -r '.count // 0' 2>/dev/null)
+if [ "${COMPLETED:-0}" -lt 1 ]; then
+    fail "No completed transfer yet. Run the Worker and the starter. If the Workflow is parked in RETRYING, send the retry Signal."
+fi
+pass "Money transfer Workflow completed"
+
+FAILED=$(temporal workflow show "${T[@]}" --workflow-id money-transfer-workflow -o json 2>/dev/null \
+    | jq '[.events[] | select(.eventType == "EVENT_TYPE_ACTIVITY_TASK_FAILED")] | length' 2>/dev/null)
+if [ "${FAILED:-0}" -ge 1 ]; then
+    pass "The latest transfer recovered from a failed Activity through the retry Signal"
+else
+    echo "NOTE: The latest transfer never needed a retry. Try the invalid-account steps to see the manual retry path."
+fi

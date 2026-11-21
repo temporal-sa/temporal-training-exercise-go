@@ -38,6 +38,12 @@ temporal server start-dev --search-attribute AccountId=Text
 go mod download
 ```
 
+## Instruqt Lab
+
+The exercises are also packaged as a hosted Instruqt lab with a ready-made
+sandbox. See [instruqt/README.md](instruqt/README.md) for how the track and
+sandbox preset are built and published.
+
 ## Exercise Progression
 
 ### [Exercise 1: Hello Temporal](exercise1/) (30 min)

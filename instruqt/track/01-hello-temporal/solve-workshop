@@ -1,0 +1,37 @@
+#!/bin/bash
+# ABOUTME: Solve script. Mimics a learner solving the challenge.
+# Runs on Skip and on `instruqt track test`. It must leave the check passing:
+# copy the finished code into the exercise package, then drive a Workflow to
+# completion after this chapter's start stamp.
+#
+# solution1 files declare `package solution1` and import
+# github.com/temporal/training/solution1, so every reference is renamed on
+# the way in. Binaries are built up front so the Worker's PID is the process
+# itself, not a `go run` wrapper that would orphan it on kill.
+set -uo pipefail
+export HOME="${HOME:-/root}" GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/usr/local/bin:$PATH"
+cd /root/workshop || exit 0
+
+(cd solution1 && find . -name '*.go') | while read -r f; do
+    mkdir -p "exercise1/$(dirname "$f")"
+    sed 's/solution1/exercise1/g' "solution1/$f" > "exercise1/$f"
+done
+
+pkill -f "go run"     2>/dev/null || true
+pkill -f "/exe/worker"  2>/dev/null || true
+pkill -f "/tmp/solve/"  2>/dev/null || true
+sleep 1
+
+mkdir -p /tmp/solve
+go build -o /tmp/solve/worker-01  ./exercise1/worker  || exit 0
+go build -o /tmp/solve/starter-01 ./exercise1/starter || exit 0
+
+/tmp/solve/worker-01 > /tmp/solve-01-worker.log 2>&1 &
+WORKER_PID=$!
+sleep 3
+
+timeout 120 /tmp/solve/starter-01
+
+kill "$WORKER_PID" 2>/dev/null || true
+exit 0

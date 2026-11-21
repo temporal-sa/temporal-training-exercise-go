@@ -1,0 +1,32 @@
+#!/bin/bash
+# ABOUTME: Per-challenge setup. Clears stragglers from the prior chapter and
+# stamps the time this chapter started.
+#
+# Every exercise starts the same Workflow ID (money-transfer-workflow) with
+# the same Workflow type (Transfer) on the same task queue, so "a Workflow
+# completed" cannot tell this chapter's run from the previous one. The check
+# script counts only executions that started after the stamp written here.
+#
+# The whole repo is cloned once by the sandbox preset. Nothing is staged here.
+set -uo pipefail
+
+# `go run` compiles to /tmp/go-build*/exe/<name> and execs it, so kill both
+# the go command and the binary it spawned. One pattern per line.
+pkill -f "go run"     2>/dev/null || true
+pkill -f "/exe/worker"  2>/dev/null || true
+pkill -f "/exe/starter" 2>/dev/null || true
+pkill -f "/exe/main"    2>/dev/null || true
+pkill -f "/tmp/solve/"  2>/dev/null || true
+
+# A run left waiting on a Signal would make the next starter attach to it
+# instead of starting fresh: Go's ExecuteWorkflow returns the existing run
+# when the Workflow ID is already running.
+for wf in greeting-workflow money-transfer-workflow; do
+    temporal workflow terminate \
+        --address 127.0.0.1:7233 --namespace default \
+        --workflow-id "$wf" --reason "Exercise 6 setup" >/dev/null 2>&1 || true
+done
+
+date -u +%Y-%m-%dT%H:%M:%SZ > /tmp/workshop-start-06
+
+echo "Exercise 6 ready."

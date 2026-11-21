@@ -1,0 +1,42 @@
+#!/bin/bash
+# ABOUTME: Check script. Fill-in-the-blanks style.
+# Gate 1: every TODO in the exercise files is gone.
+# Gate 2: the package compiles.
+# Gate 3: greeting-workflow completed since this chapter started, and
+#         returned the greeting.
+fail() { echo "FAIL: $1"; exit 1; }
+pass() { echo "PASS: $1"; }
+
+export HOME="${HOME:-/root}" GOTOOLCHAIN=local
+export PATH="/usr/local/go/bin:/usr/local/bin:$PATH"
+cd /root/workshop || fail "Workshop directory is missing."
+
+EX=exercise1
+SINCE=$(cat /tmp/workshop-start-01 2>/dev/null || echo "1970-01-01T00:00:00Z")
+T=(--address 127.0.0.1:7233 --namespace default)
+
+for f in activity.go workflow.go worker/main.go; do
+    if grep -q "TODO" "$EX/$f" 2>/dev/null; then
+        fail "$EX/$f still has TODO comments. Implement them, delete the comments, then check again."
+    fi
+done
+pass "All TODOs implemented"
+
+if ! OUT=$(go build ./$EX/... 2>&1); then
+    echo "$OUT" | tail -15
+    fail "$EX does not compile. Fix the errors above, then check again."
+fi
+pass "$EX compiles"
+
+COMPLETED=$(temporal workflow count "${T[@]}" -o json \
+    --query "WorkflowId=\"greeting-workflow\" AND ExecutionStatus=\"Completed\" AND StartTime > \"$SINCE\"" \
+    2>/dev/null | jq -r '.count // 0' 2>/dev/null)
+if [ "${COMPLETED:-0}" -lt 1 ]; then
+    fail "No completed greeting-workflow yet. Start the Worker, run the starter, and wait for the greeting to print."
+fi
+pass "greeting-workflow completed"
+
+if ! temporal workflow result "${T[@]}" --workflow-id greeting-workflow 2>/dev/null | grep -q "Hello, Temporal!"; then
+    fail "greeting-workflow completed but did not return \"Hello, Temporal!\". Check the format string in CreateGreeting."
+fi
+pass "Workflow returned \"Hello, Temporal!\""
