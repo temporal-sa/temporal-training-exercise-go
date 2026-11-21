@@ -1,5 +1,6 @@
 ---
 slug: hello-temporal
+id: khy45mzgj60a
 type: challenge
 title: 'Exercise 1: Hello Temporal'
 teaser: Write your first Workflow, Activity and Worker in Go. Run it and read the
@@ -28,28 +29,34 @@ notes:
     The Solution tab has finished code for every exercise. Use it when you
     are stuck, not before.
 tabs:
-- title: Code Editor
+- id: yh2x7h5hmiwh
+  title: Code Editor
   type: code
   hostname: workshop
   path: /root/workshop/exercise1
-- title: Worker
+- id: ykzyserbdx0h
+  title: Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop
-- title: Terminal
+- id: 13x381eycgnt
+  title: Terminal
   type: terminal
   hostname: workshop
   workdir: /root/workshop
-- title: Temporal UI
+- id: m1x45s1vsgr1
+  title: Temporal UI
   type: service
   hostname: workshop
   path: /
   port: 8233
-- title: Solution
+- id: 6krwcnaqmy0s
+  title: Solution
   type: code
   hostname: workshop
   path: /root/workshop/solution1
-- title: Network Control Panel
+- id: wunyjp9xsd4t
+  title: Network Control Panel
   type: service
   hostname: workshop
   path: /

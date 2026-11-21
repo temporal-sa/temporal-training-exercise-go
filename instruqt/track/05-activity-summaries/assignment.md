@@ -1,5 +1,6 @@
 ---
 slug: activity-summaries
+id: 8wukhk3fa2ae
 type: challenge
 title: 'Exercise 5: Activity Summaries and Metadata'
 teaser: Make the event history readable. Attach a one-line summary to every Activity.
@@ -21,28 +22,34 @@ notes:
     the event, they cost nothing at runtime, and they are not part of
     Workflow logic. Changing a summary string does not break replay.
 tabs:
-- title: Code Editor
+- id: sxpztdz6oky4
+  title: Code Editor
   type: code
   hostname: workshop
   path: /root/workshop/exercise5
-- title: Worker
+- id: watqzlnzfp4a
+  title: Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop
-- title: Terminal
+- id: i3msxhhx60np
+  title: Terminal
   type: terminal
   hostname: workshop
   workdir: /root/workshop
-- title: Temporal UI
+- id: 5pru0plgshgt
+  title: Temporal UI
   type: service
   hostname: workshop
   path: /
   port: 8233
-- title: Solution
+- id: ud0gdn6pcg9n
+  title: Solution
   type: code
   hostname: workshop
   path: /root/workshop/solution5
-- title: Network Control Panel
+- id: pgo9u7ltgkcu
+  title: Network Control Panel
   type: service
   hostname: workshop
   path: /

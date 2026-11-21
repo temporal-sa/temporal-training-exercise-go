@@ -1,5 +1,6 @@
 ---
 slug: unit-testing
+id: 0pm9icmnyh52
 type: challenge
 title: 'Exercise 6: Unit Testing Workflows'
 teaser: Test a Workflow that waits for a human, with time skipping and mocked Activities.
@@ -22,28 +23,34 @@ notes:
     mocked Activities and a fake clock. These tests run in CI with nothing
     installed, and they finish in well under a second.
 tabs:
-- title: Code Editor
+- id: yl8ewaxmm0ow
+  title: Code Editor
   type: code
   hostname: workshop
   path: /root/workshop/exercise6
-- title: Worker
+- id: p0huzci8jpqx
+  title: Worker
   type: terminal
   hostname: workshop
   workdir: /root/workshop
-- title: Terminal
+- id: 20pvcaiq6bei
+  title: Terminal
   type: terminal
   hostname: workshop
   workdir: /root/workshop
-- title: Temporal UI
+- id: chk0pam7lb9q
+  title: Temporal UI
   type: service
   hostname: workshop
   path: /
   port: 8233
-- title: Solution
+- id: wnaibxyzxxe7
+  title: Solution
   type: code
   hostname: workshop
   path: /root/workshop/solution6
-- title: Network Control Panel
+- id: leigs0xlwlsv
+  title: Network Control Panel
   type: service
   hostname: workshop
   path: /
